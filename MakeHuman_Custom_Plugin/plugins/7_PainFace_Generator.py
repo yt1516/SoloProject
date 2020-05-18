@@ -122,6 +122,7 @@ class ExampleTaskView(gui3d.TaskView):
         # self.au_coding = box_aus_code.addWidget(gui.DocumentEdit(text='Neutral'), columnSpan = 2)
         # self.one_shot_button = box_tools.addWidget(gui.Button('Take one shot'), 1, 0)
 
+        self.survey_img_button=box_weight.addWidget(gui.Button('Generate Survey Images'), columnSpan = 2)
         self.au4_lab=box_weight.addWidget(gui.TextView('AU4 Weight'))
         self.au4_val=box_weight.addWidget(gui.TextEdit(text='0.8865'))
         self.au7_lab=box_weight.addWidget(gui.TextView('AU7 Weight'))
@@ -270,6 +271,20 @@ class ExampleTaskView(gui3d.TaskView):
                     'Yes', 'Cancel', self.resetFacialCodes)
 
 ##########################################################################
+# Generate 81 images for the survey website
+##########################################################################
+        @self.survey_img_button.mhEvent
+        def onClicked(event):
+            weight=[0,0.5,1]
+            for i4 in range(3):
+                for i7 in range(3):
+                    for i9 in range(3):
+                        for i10 in range(3):
+                            self.survey_img_gen(weight[i4],weight[i7],weight[i9],weight[i10])
+                            time.sleep(0.5)
+                            self.renderSurveyImg(i4,i7,i9,i10)
+
+##########################################################################
 # Generate and save 101 images for overall intensity = 0% to 100%
 ##########################################################################
         @self.generate_set_button.mhEvent
@@ -285,6 +300,66 @@ class ExampleTaskView(gui3d.TaskView):
         def onChange(value):
             self.masterslider_render(value, True)
 
+    def survey_img_gen(self,i4,i7,i9,i10):
+        for key_code in self.slidersValues.keys():
+            if key_code=='4':
+                self.sliders[key_code].onChanging(i4)
+                self.labelSlider[key_code].setTextFormat( 'Intensity: %.2f%%', self.sliders[key_code].getValue()*100)
+            elif key_code=='7':
+                self.sliders[key_code].onChanging(i7)
+                self.labelSlider[key_code].setTextFormat( 'Intensity: %.2f%%', self.sliders[key_code].getValue()*100)
+            elif key_code=='9':
+                self.sliders[key_code].onChanging(i9)
+                self.labelSlider[key_code].setTextFormat( 'Intensity: %.2f%%', self.sliders[key_code].getValue()*100)
+            elif key_code=='10':
+                self.sliders[key_code].onChanging(i10)
+                self.labelSlider[key_code].setTextFormat( 'Intensity: %.2f%%', self.sliders[key_code].getValue()*100)
+            else:
+                self.sliders[key_code].onChanging(0)
+            self.sliders[key_code].update()
+        self.facs_human.applyAllTargets()
+
+    def renderSurveyImg(self, i4,i7,i9,i10,dir_images = None, pic_file = None, pic_file_reverse = None):
+       self.facs_human.applyAllTargets()
+       self.refreshAuSmoothSetting()
+
+       grabPath = mh.getPath('grab')
+       if not os.path.exists(grabPath):
+          os.makedirs(grabPath)
+
+       if pic_file is not None:
+          dir_pic_file = os.path.join(grabPath, dir_images)
+          pic_file = pic_file + '.png'
+          pic_file = os.path.join(dir_pic_file, pic_file)
+          if pic_file_reverse is not None:
+             pic_file_reverse = pic_file_reverse + '.png'
+             pic_file_reverse = os.path.join(dir_pic_file, pic_file_reverse)
+       else:
+           grabName = str(i4)+str(i7)+str(i9)+str(i10)+'.png'
+           pic_file = os.path.join(grabPath, grabName)
+
+
+       if self.renderingWidth == '' or self.renderingHeight == '' :
+          G.app.prompt('Warning',
+                        'Nothing to render check the image size.',
+                        'Ok')
+       else:
+           img_width, img_height  = 2000,2000#int(self.renderingWidth), int(self.renderingHeight)
+           glmodule.draw(False)
+           img = glmodule.renderToBuffer(img_width, img_height)
+           alphaImg = glmodule.renderAlphaMask(img_width, img_height)
+           img = imgop.addAlpha(img, imgop.getChannel(alphaImg, 0))
+           img = img.toQImage()
+           if pic_file is not None:
+               img.save(pic_file)
+               log.message("Image saved to %s", pic_file)
+           if pic_file_reverse is not None:
+               img.save(pic_file_reverse)
+               log.message("Image saved to %s", pic_file_reverse)
+           del alphaImg
+           del img
+
+           gui3d.app.statusPersist("Image saved to %s", pic_file)
 
     def generate_face_set(self,val):
         multiplier=float(val)/200
