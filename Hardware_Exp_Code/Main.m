@@ -40,7 +40,7 @@ K_k_Y=0;
 P_k_Y=0;
 
 %% Sensitivity Matrix
-%IM=load_img();
+IM=load_img();
 
 wid=400; % platform width
 len=400; % platform length
