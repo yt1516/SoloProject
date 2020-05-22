@@ -338,7 +338,6 @@ class ExampleTaskView(gui3d.TaskView):
            grabName = str(i4)+str(i7)+str(i9)+str(i10)+'.png'
            pic_file = os.path.join(grabPath, grabName)
 
-
        if self.renderingWidth == '' or self.renderingHeight == '' :
           G.app.prompt('Warning',
                         'Nothing to render check the image size.',

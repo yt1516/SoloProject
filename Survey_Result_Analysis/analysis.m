@@ -75,30 +75,15 @@ sel_au=zeros(4,n);
 for i=1:1:length(idx)
     sel_au(:,i)=au(:,idx(i));
 end
-% [beta,Sigma] = mvregress(sel_au',sel_mean');
 [b,bint,r,rint,stats] = regress(sel_mean',sel_au');
 au_t=sel_au';
 R_t=sel_mean';
 
 b
 
-%res=au_t*beta;
-%dif=abs(res-R_t);
-% %% Regression with Median
-% [beta,Sigma] = regress(au',totalMedian');
-% au_t=au';
-% R_t=totalMedian';
-% res=au_t*beta;
-% dif=abs(res-R_t);
-% %% Regression with Mean
-% [b,bint,r,rint,stats] = regress(totalMean',au');
-% au_t=au';
-% R_t=totalMean';
-% res=au_t*beta;
-% dif=abs(res-R_t);
-% %%
-% M=movmean(dif,9);
-% bar(dif,'FaceAlpha',.60)
-% hold on
-% plot(M,'LineWidth',3)
-% legend('error','moving average - 9')
+%% All Images
+[b,bint,r,rint,stats] = regress(totalMean',au');
+au_t=au';
+R_t=totalMean';
+
+b
